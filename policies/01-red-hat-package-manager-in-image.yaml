@@ -1,0 +1,29 @@
+apiVersion: config.stackrox.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: red-hat-package-manager-in-image
+  namespace: rhacs
+spec:
+  policyName: '01-Parasol: Red Hat Package Manager in Image'
+  description: Alert on deployments with components of the Red Hat/Fedora/CentOS package
+    management system.
+  rationale: Package managers make it easier for attackers to use compromised containers,
+    since they can easily add software.
+  remediation: Run `rpm -e --nodeps $(rpm -qa '*rpm*' '*dnf*' '*libsolv*' '*hawkey*'
+    'yum*')` in the image build for production containers or use a distroless or Red Hat Hardened base image.
+  categories:
+  - Parasol Secured Build Gate
+  lifecycleStages:
+  - BUILD
+  severity: HIGH_SEVERITY
+  enforcementActions:
+  - FAIL_BUILD_ENFORCEMENT
+  disabled: false
+  policySections:
+  - sectionName: ''
+    policyGroups:
+    - fieldName: Image Component
+      booleanOperator: OR
+      negate: false
+      values:
+      - value: rpm|microdnf|dnf|yum=
